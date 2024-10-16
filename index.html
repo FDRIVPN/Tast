@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect to Tonkeeper</title>
+    <title>Connect to Ton Wallet</title>
     <style>
         body {
             display: flex;
@@ -32,35 +32,38 @@
 <body>
 
     <div>
-        <button id="connectWalletBtn">Connect Tonkeeper</button>
+        <button id="connectWalletBtn">Connect Ton Wallet</button>
         <p id="walletAddress"></p>
     </div>
 
+    <!-- بارگذاری Ton Connect SDK -->
     <script src="https://unpkg.com/@tonconnect/sdk@0.1.0/dist/tonconnect.umd.js"></script>
     <script>
-        const connectWalletBtn = document.getElementById('connectWalletBtn');
-        const walletAddressDisplay = document.getElementById('walletAddress');
-
         // ایجاد نمونه‌ای از TonConnect
         const tonConnect = new TonConnect();
 
+        const connectWalletBtn = document.getElementById('connectWalletBtn');
+        const walletAddressDisplay = document.getElementById('walletAddress');
+
+        // وقتی دکمه کلیک می‌شود
         connectWalletBtn.addEventListener('click', async () => {
             try {
-                // درخواست اتصال به کیف پول
+                // درخواست اتصال به کیف پول Ton
                 const provider = await tonConnect.connect();
 
                 // اگر اتصال موفق بود
                 if (provider) {
                     const walletAddress = provider.accounts[0].address;
                     walletAddressDisplay.innerText = `Connected: ${walletAddress}`;
-                    
+
                     // ذخیره آدرس کیف پول در localStorage
                     localStorage.setItem('walletAddress', walletAddress);
 
+                    // غیر فعال کردن دکمه پس از اتصال
                     connectWalletBtn.disabled = true;
                 }
             } catch (error) {
-                console.error('Error connecting to Tonkeeper:', error);
+                console.error('Error connecting to Ton wallet:', error);
             }
         });
     </script>
