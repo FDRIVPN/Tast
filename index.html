@@ -36,33 +36,20 @@
         <p id="walletAddress"></p>
     </div>
 
-    <!-- بارگذاری Ton Connect SDK -->
-    <script src="https://cdn.ton.dev/tonconnect.sdk/latest/tonconnect.umd.js"></script>
     <script>
-        const tonConnect = new TonConnect({ 
-            chain: 'mainnet',  // یا 'testnet' برای شبکه تست
-        });
-
         const connectWalletBtn = document.getElementById('connectWalletBtn');
         const walletAddressDisplay = document.getElementById('walletAddress');
 
-        connectWalletBtn.addEventListener('click', async () => {
-            try {
-                const session = await tonConnect.connect();
-                if (session) {
-                    const walletAddress = session.accounts[0].address;
-                    walletAddressDisplay.innerText = `متصل شد: ${walletAddress}`;
+        connectWalletBtn.addEventListener('click', () => {
+            // URL اتصال به کیف پول
+            const connectionUrl = "tc://?v=2&id=d4af569ab38d65bd8cce82e4485c091440a289b719626a6bd109eb5c50133445&r=%7B%22manifestUrl%22%3A%22https%3A%2F%2Fmajor.bot%2Ftonconnect-manifest.json%22%2C%22items%22%3A%5B%7B%22name%22%3A%22ton_addr%22%7D%5D%7D";
 
-                    // ذخیره آدرس کیف پول در localStorage
-                    localStorage.setItem('walletAddress', walletAddress);
+            // هدایت کاربر به URL اتصال
+            window.location.href = connectionUrl;
 
-                    // غیر فعال کردن دکمه پس از اتصال
-                    connectWalletBtn.disabled = true;
-                }
-            } catch (error) {
-                console.error('خطا در اتصال به کیف پول Ton:', error);
-                walletAddressDisplay.innerText = 'خطا در اتصال به کیف پول.';
-            }
+            // در اینجا می‌توانید کدی برای دریافت آدرس کیف پول اضافه کنید
+            // بعد از اتصال موفق به کیف پول، آدرس آن را دریافت کنید
+            // و در متغیر walletAddressDisplay نمایش دهید
         });
     </script>
 
