@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect to Ton Wallet</title>
+    <title>اتصال به کیف پول Ton</title>
     <style>
         body {
             display: flex;
@@ -32,29 +32,26 @@
 <body>
 
     <div>
-        <button id="connectWalletBtn">Connect Ton Wallet</button>
+        <button id="connectWalletBtn">اتصال به کیف پول Ton</button>
         <p id="walletAddress"></p>
     </div>
 
     <!-- بارگذاری Ton Connect SDK -->
-    <script src="https://unpkg.com/@tonconnect/sdk@0.1.0/dist/tonconnect.umd.js"></script>
+    <script src="https://cdn.ton.dev/tonconnect.sdk/latest/tonconnect.umd.js"></script>
     <script>
-        // ایجاد نمونه‌ای از TonConnect
-        const tonConnect = new TonConnect();
+        const tonConnect = new TonConnect({ 
+            chain: 'mainnet',  // یا 'testnet' برای شبکه تست
+        });
 
         const connectWalletBtn = document.getElementById('connectWalletBtn');
         const walletAddressDisplay = document.getElementById('walletAddress');
 
-        // وقتی دکمه کلیک می‌شود
         connectWalletBtn.addEventListener('click', async () => {
             try {
-                // درخواست اتصال به کیف پول Ton
-                const provider = await tonConnect.connect();
-
-                // اگر اتصال موفق بود
-                if (provider) {
-                    const walletAddress = provider.accounts[0].address;
-                    walletAddressDisplay.innerText = `Connected: ${walletAddress}`;
+                const session = await tonConnect.connect();
+                if (session) {
+                    const walletAddress = session.accounts[0].address;
+                    walletAddressDisplay.innerText = `متصل شد: ${walletAddress}`;
 
                     // ذخیره آدرس کیف پول در localStorage
                     localStorage.setItem('walletAddress', walletAddress);
@@ -63,7 +60,8 @@
                     connectWalletBtn.disabled = true;
                 }
             } catch (error) {
-                console.error('Error connecting to Ton wallet:', error);
+                console.error('خطا در اتصال به کیف پول Ton:', error);
+                walletAddressDisplay.innerText = 'خطا در اتصال به کیف پول.';
             }
         });
     </script>
