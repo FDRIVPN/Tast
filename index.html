@@ -3,54 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> wallt on</title>
+    <title>Connect Tonkeepr</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
+            background-color: #f4f4f4;
         }
         button {
             padding: 10px 20px;
-            background-color: #008cff;
-            color: white;
-            border: none;
-            border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-        }
-        #walletAddress {
-            margin-top: 20px;
-            font-size: 18px;
-            color: green;
         }
     </style>
 </head>
 <body>
-
-    <div>
-        <button id="connectWalletBtn">اتصال به کیف پول Ton</button>
-        <p id="walletAddress"></p>
-    </div>
+    <button onclick="connectTonkeepr()">Connect Tonkeepr</button>
 
     <script>
-        const connectWalletBtn = document.getElementById('connectWalletBtn');
-        const walletAddressDisplay = document.getElementById('walletAddress');
-
-        connectWalletBtn.addEventListener('click', () => {
-            // URL اتصال به کیف پول
-            const connectionUrl = "tc://?v=2&id=d4af569ab38d65bd8cce82e4485c091440a289b719626a6bd109eb5c50133445&r=%7B%22manifestUrl%22%3A%22https%3A%2F%2Ffdrivpn.github.io%2Ftonconnect-manifest.json%22%2C%22items%22%3A%5B%7B%22name%22%3A%22ton_addr%22%7D%5D%7D
-            // هدایت کاربر به URL اتصال
-            window.location.href = connectionUrl;
-
-            // در اینجا می‌توانید کدی برای دریافت آدرس کیف پول اضافه کنید
-            // بعد از اتصال موفق به کیف پول، آدرس آن را دریافت کنید
-            // و در متغیر walletAddressDisplay نمایش دهید
-        });
+        function connectTonkeepr() {
+            window.location.href = "tc://?v=2&id=d4af569ab38d65bd8cce82e4485c091440a289b719626a6bd109eb5c50133445&r=%7B%22manifestUrl%22%3A%22https%3A%2F%2Ffdrivpn.github.io%2Ftonconnect-manifest.json%22%2C%22items%22%3A%5B%7B%22name%22%3A%22ton_addr%22%7D%5D%7D";
+        }
     </script>
-
 </body>
 </html>
