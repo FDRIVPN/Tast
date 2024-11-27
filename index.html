@@ -77,9 +77,7 @@
       board[index] = currentPlayer;
       renderBoard();
 
-      // لاگ برای بررسی
-      console.log(`Player ${currentPlayer} moved to index ${index}`);
-      
+      // بررسی برنده بعد از هر حرکت
       if (checkWinner(currentPlayer)) {
         statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
         gameOver = true;  // بازی تمام شده است
@@ -96,13 +94,14 @@
       currentPlayer = currentPlayer === human ? ai : human;
       statusElement.textContent = `نوبت ${currentPlayer === human ? 'شما' : 'کامپیوتر'} (${currentPlayer})`;
 
-      if (currentPlayer === ai) {
+      if (currentPlayer === ai && !gameOver) {
         setTimeout(aiMove, 500);  // حرکت کامپیوتر با کمی تأخیر
       }
     }
 
     // حرکت کامپیوتر
     function aiMove() {
+      if (gameOver) return;  // اگر بازی تمام شده باشد، حرکت انجام نمی‌شود
       const bestMove = minimax(board, ai);
       board[bestMove.index] = ai;
       renderBoard();
@@ -167,8 +166,6 @@
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // ستون‌ها
         [0, 4, 8], [2, 4, 6] // قطری‌ها
       ];
-
-      console.log(`Checking for winner: ${player}`);
 
       return winPatterns.some(pattern => pattern.every(index => board[index] === player));
     }
