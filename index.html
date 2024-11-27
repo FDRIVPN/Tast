@@ -77,7 +77,6 @@
       board[index] = currentPlayer;
       renderBoard();
 
-      // بررسی برنده بعد از هر حرکت
       if (checkWinner(currentPlayer)) {
         statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
         gameOver = true;  // بازی تمام شده است
@@ -94,14 +93,13 @@
       currentPlayer = currentPlayer === human ? ai : human;
       statusElement.textContent = `نوبت ${currentPlayer === human ? 'شما' : 'کامپیوتر'} (${currentPlayer})`;
 
-      if (currentPlayer === ai && !gameOver) {
+      if (currentPlayer === ai) {
         setTimeout(aiMove, 500);  // حرکت کامپیوتر با کمی تأخیر
       }
     }
 
     // حرکت کامپیوتر
     function aiMove() {
-      if (gameOver) return;  // اگر بازی تمام شده باشد، حرکت انجام نمی‌شود
       const bestMove = minimax(board, ai);
       board[bestMove.index] = ai;
       renderBoard();
