@@ -121,20 +121,8 @@
     }
 
     function aiMove() {
-      const winningMove = findWinningMove(ai);
-      const blockingMove = findWinningMove(human);
-
-      if (winningMove !== null) {
-        board[winningMove] = ai;
-      } else if (blockingMove !== null) {
-        board[blockingMove] = ai;
-      } else if (board[4] === null) {
-        board[4] = ai;
-      } else {
-        const bestMove = minimax(board, ai);
-        board[bestMove.index] = ai;
-      }
-
+      const bestMove = minimax(board, ai).index;
+      board[bestMove] = ai;
       renderBoard();
 
       const winnerPattern = checkWinner(ai);
@@ -149,33 +137,33 @@
       statusElement.textContent = 'نوبت شماست (X)';
     }
 
-    function minimax(board, player) {
-      const availableMoves = getAvailableMoves(board);
-      if (checkWinner(human, board)) return { score: -10 };
-      if (checkWinner(ai, board)) return { score: 10 };
+    function minimax(newBoard, player) {
+      const availableMoves = getAvailableMoves(newBoard);
+
+      if (checkWinner(human, newBoard)) return { score: -10 };
+      if (checkWinner(ai, newBoard)) return { score: 10 };
       if (availableMoves.length === 0) return { score: 0 };
 
       const moves = [];
-      for (const move of availableMoves) {
-        const newBoard = [...board];
-        newBoard[move] = player;
-        const result = minimax(newBoard, player === ai ? human : ai);
-        moves.push({ index: move, score: result.score });
-      }
+      availableMoves.forEach(index => {
+        const boardCopy = [...newBoard];
+        boardCopy[index] = player;
 
-      if (player === ai) {
-        return moves.reduce((best, move) => (move.score > best.score ? move : best), { score: -Infinity });
-      } else {
-        return moves.reduce((best, move) => (move.score < best.score ? move : best), { score: Infinity });
-      }
+        const result = minimax(boardCopy, player === ai ? human : ai);
+        moves.push({ index, score: result.score });
+      });
+
+      return player === ai
+        ? moves.reduce((best, move) => (move.score > best.score ? move : best), { score: -Infinity })
+        : moves.reduce((best, move) => (move.score < best.score ? move : best), { score: Infinity });
     }
 
     function getAvailableMoves(board) {
       return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
     }
 
-    function checkWinner(player) {
-      return winPatterns.find(pattern => pattern.every(index => board[index] === player)) || null;
+    function checkWinner(player, boardState = board) {
+      return winPatterns.find(pattern => pattern.every(index => boardState[index] === player)) || null;
     }
 
     function drawLine(pattern) {
