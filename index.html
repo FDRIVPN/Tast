@@ -12,7 +12,7 @@
       align-items: center;
       height: 100vh;
       margin: 0;
-      background: #f4f4f4;
+      background-color: #f4f4f4;
     }
     .board {
       display: grid;
@@ -54,6 +54,104 @@
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
 
-    // ایجاد سلول‌ها
+    // ایجاد و نمایش سلول‌ها
     function renderBoard() {
-      boardElement.innerHTML
+      boardElement.innerHTML = '';
+      board.forEach((cell, index) => {
+        const cellElement = document.createElement('div');
+        cellElement.classList.add('cell');
+        if (cell) {
+          cellElement.textContent = cell;
+          cellElement.classList.add('taken');
+        }
+        cellElement.addEventListener('click', () => handleHumanMove(index), { once: true });
+        boardElement.appendChild(cellElement);
+      });
+    }
+
+    // حرکت انسان
+    function handleHumanMove(index) {
+      if (board[index]) return;  // اگر خانه پر است، حرکت انجام نمی‌شود
+      board[index] = human;
+      renderBoard();
+      if (checkWinner(human)) {
+        statusElement.textContent = 'شما برنده شدید!';
+        return;
+      }
+      if (board.every(cell => cell)) {
+        statusElement.textContent = 'بازی مساوی شد!';
+        return;
+      }
+      statusElement.textContent = 'نوبت کامپیوتر (O)';
+      setTimeout(aiMove, 500);
+    }
+
+    // حرکت کامپیوتر
+    function aiMove() {
+      const bestMove = minimax(board, ai);
+      board[bestMove.index] = ai;
+      renderBoard();
+      if (checkWinner(ai)) {
+        statusElement.textContent = 'کامپیوتر برنده شد!';
+        return;
+      }
+      statusElement.textContent = 'نوبت شماست (X)';
+    }
+
+    // الگوریتم Minimax برای انتخاب بهترین حرکت
+    function minimax(board, player) {
+      const availableMoves = getAvailableMoves(board);
+      const moves = availableMoves.map(move => {
+        const newBoard = [...board];
+        newBoard[move] = player;
+        const score = minimaxScore(newBoard, player === ai ? human : ai);
+        return { index: move, score };
+      });
+
+      if (player === ai) {
+        return moves.reduce((bestMove, currentMove) => {
+          return currentMove.score > bestMove.score ? currentMove : bestMove;
+        });
+      } else {
+        return moves.reduce((bestMove, currentMove) => {
+          return currentMove.score < bestMove.score ? currentMove : bestMove;
+        });
+      }
+    }
+
+    // محاسبه امتیاز برای هر حرکت
+    function minimaxScore(board, currentPlayer) {
+      if (checkWinner(ai)) return 1;
+      if (checkWinner(human)) return -1;
+      if (board.every(cell => cell)) return 0;
+
+      const availableMoves = getAvailableMoves(board);
+      const scores = availableMoves.map(move => {
+        const newBoard = [...board];
+        newBoard[move] = currentPlayer;
+        return minimaxScore(newBoard, currentPlayer === ai ? human : ai);
+      });
+
+      return currentPlayer === ai ? Math.max(...scores) : Math.min(...scores);
+    }
+
+    // دریافت حرکات قابل انجام
+    function getAvailableMoves(board) {
+      return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
+    }
+
+    // بررسی برنده
+    function checkWinner(player) {
+      const winPatterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // سطرها
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // ستون‌ها
+        [0, 4, 8], [2, 4, 6] // قطری‌ها
+      ];
+      return winPatterns.some(pattern => pattern.every(index => board[index] === player));
+    }
+
+    // شروع بازی
+    renderBoard();
+  </script>
+</body>
+</html>
