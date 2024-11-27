@@ -88,7 +88,7 @@
 
     // حرکت کامپیوتر
     function aiMove() {
-      const bestMove = minimax(board, ai);
+      const bestMove = getBestMove(board, ai);
       board[bestMove.index] = ai;
       renderBoard();
       if (checkWinner(ai)) {
@@ -98,41 +98,41 @@
       statusElement.textContent = 'نوبت شماست (X)';
     }
 
-    // الگوریتم Minimax برای انتخاب بهترین حرکت
-    function minimax(board, player) {
+    // دریافت بهترین حرکت با توجه به وضعیت بازی
+    function getBestMove(board, player) {
       const availableMoves = getAvailableMoves(board);
-      const moves = availableMoves.map(move => {
-        const newBoard = [...board];
-        newBoard[move] = player;
-        const score = minimaxScore(newBoard, player === ai ? human : ai);
-        return { index: move, score };
-      });
+      let bestMove = null;
 
-      if (player === ai) {
-        return moves.reduce((bestMove, currentMove) => {
-          return currentMove.score > bestMove.score ? currentMove : bestMove;
-        });
-      } else {
-        return moves.reduce((bestMove, currentMove) => {
-          return currentMove.score < bestMove.score ? currentMove : bestMove;
-        });
+      // اول، کامپیوتر (O) تلاش می‌کند تا از برد کاربر جلوگیری کند
+      for (let i = 0; i < availableMoves.length; i++) {
+        const move = availableMoves[i];
+        const newBoard = [...board];
+        newBoard[move] = human;
+        if (checkWinner(human, newBoard)) {
+          bestMove = { index: move, score: -1 }; // جلوگیری از برد انسان
+          break;
+        }
       }
-    }
 
-    // محاسبه امتیاز برای هر حرکت
-    function minimaxScore(board, currentPlayer) {
-      if (checkWinner(ai)) return 10;
-      if (checkWinner(human)) return -10;
-      if (board.every(cell => cell)) return 0;
+      // اگر هنوز بهترین حرکت پیدا نشده بود، کامپیوتر به دنبال برد خود می‌گردد
+      if (!bestMove) {
+        for (let i = 0; i < availableMoves.length; i++) {
+          const move = availableMoves[i];
+          const newBoard = [...board];
+          newBoard[move] = ai;
+          if (checkWinner(ai, newBoard)) {
+            bestMove = { index: move, score: 1 }; // برد کامپیوتر
+            break;
+          }
+        }
+      }
 
-      const availableMoves = getAvailableMoves(board);
-      const scores = availableMoves.map(move => {
-        const newBoard = [...board];
-        newBoard[move] = currentPlayer;
-        return minimaxScore(newBoard, currentPlayer === ai ? human : ai);
-      });
+      // اگر هنوز بهترین حرکت پیدا نشده بود، کامپیوتر یکی از خانه‌های خالی را انتخاب می‌کند
+      if (!bestMove) {
+        bestMove = { index: availableMoves[0], score: 0 };
+      }
 
-      return currentPlayer === ai ? Math.max(...scores) : Math.min(...scores);
+      return bestMove;
     }
 
     // دریافت حرکات قابل انجام
@@ -141,7 +141,8 @@
     }
 
     // بررسی برنده
-    function checkWinner(player) {
+    function checkWinner(player, board = null) {
+      board = board || this.board; // اگر برد مشخص نشده باشد، از برد اصلی استفاده می‌کنیم
       const winPatterns = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8], // سطرها
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // ستون‌ها
