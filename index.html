@@ -1,32 +1,59 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect Tonkeepr</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بازی دوز</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 2px solid #ccc;
+    }
+    .cell.taken {
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 20px;
+    }
+  </style>
 </head>
 <body>
-    <button onclick="connectTonkeepr()">Connect Tonkeepr</button>
+  <div>
+    <div class="board" id="board"></div>
+    <div class="status" id="status">نوبت شماست (X)</div>
+  </div>
+  <script>
+    const board = Array(9).fill(null);
+    const human = "X";
+    const ai = "O";
 
-    <script>
-        function connectTonkeepr() {
-            window.location.href = "tc://?v=2&id=d4af569ab38d65bd8cce82e4485c091440a289b719626a6bd109eb5c50133445&r=%7B%22manifestUrl%22%3A%22https%3A%2F%2Ffdrivpn.github.io%2FApp%2Ftonconnect-manifest.json%22%2C%22items%22%3A%5B%7B%22name%22%3A%22ton_addr%22%7D%5D%7D";
-        }
-    </script>
-</body>
-</html>
+    const boardElement = document.getElementById("board");
+    const statusElement = document.getElementById("status");
+
+    // ایجاد سلول‌ها
+    function renderBoard() {
+      boardElement.innerHTML
