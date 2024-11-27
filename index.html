@@ -161,7 +161,7 @@
 
     // بررسی برنده
     function checkWinner(player, board = null) {
-      board = board || this.board; // اص نشده باشد، از برد اصلی استفاده می‌کنیم
+      board = board || this.board; // اگر برد مشخص نشده باشد، از برد اصلی استفاده می‌کنیم
       const winPatterns = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8], // سطرها
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // ستون‌ها
