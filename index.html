@@ -121,8 +121,8 @@
 
     // محاسبه امتیاز برای هر حرکت
     function minimaxScore(board, currentPlayer) {
-      if (checkWinner(ai)) return 1;
-      if (checkWinner(human)) return -1;
+      if (checkWinner(ai)) return 10;
+      if (checkWinner(human)) return -10;
       if (board.every(cell => cell)) return 0;
 
       const availableMoves = getAvailableMoves(board);
