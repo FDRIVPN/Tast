@@ -14,6 +14,9 @@
       margin: 0;
       background-color: #f4f4f4;
     }
+    .game-container {
+      position: relative;
+    }
     .board {
       display: grid;
       grid-template-columns: repeat(3, 100px);
@@ -39,24 +42,45 @@
       text-align: center;
       font-size: 20px;
     }
+    .line {
+      position: absolute;
+      background-color: red;
+      height: 5px;
+      width: 300px;
+      transform-origin: center;
+      transform: translate(-50%, -50%);
+      display: none; /* مخفی تا زمانی که برنده مشخص شود */
+    }
   </style>
 </head>
 <body>
-  <div>
+  <div class="game-container">
     <div class="board" id="board"></div>
+    <div class="line" id="line"></div> <!-- خط برنده -->
     <div class="status" id="status">نوبت شماست (X)</div>
   </div>
   <script>
     const board = Array(9).fill(null);
     const human = "X";
     const ai = "O";
-    let currentPlayer = human;  // نوبت اولیه انسان است
-    let gameOver = false;  // وضعیت بازی (آیا تمام شده است یا نه)
+    let currentPlayer = human;
+    let gameOver = false;
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
+    const lineElement = document.getElementById("line");
 
-    // نمایش برد بازی
+    const winPatterns = [
+      [0, 1, 2], // ردیف اول
+      [3, 4, 5], // ردیف دوم
+      [6, 7, 8], // ردیف سوم
+      [0, 3, 6], // ستون اول
+      [1, 4, 7], // ستون دوم
+      [2, 5, 8], // ستون سوم
+      [0, 4, 8], // قطر اصلی
+      [2, 4, 6], // قطر فرعی
+    ];
+
     function renderBoard() {
       boardElement.innerHTML = '';
       board.forEach((cell, index) => {
@@ -71,104 +95,99 @@
       });
     }
 
-    // حرکت انسان یا کامپیوتر
     function handleMove(index) {
-      if (board[index] || gameOver) return;  // اگر خانه پر است یا بازی تمام شده است، حرکت انجام نمی‌شود
+      if (board[index] || gameOver) return;
+
       board[index] = currentPlayer;
       renderBoard();
 
-      if (checkWinner(currentPlayer)) {
+      const winnerPattern = checkWinner(currentPlayer);
+      if (winnerPattern) {
+        drawLine(winnerPattern);
         statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
-        gameOver = true;  // بازی تمام شده است
+        gameOver = true;
         return;
       }
 
       if (board.every(cell => cell)) {
         statusElement.textContent = 'بازی مساوی شد!';
-        gameOver = true;  // بازی تمام شده است
+        gameOver = true;
         return;
       }
 
-      // تغییر نوبت بازی
       currentPlayer = currentPlayer === human ? ai : human;
       statusElement.textContent = `نوبت ${currentPlayer === human ? 'شما' : 'کامپیوتر'} (${currentPlayer})`;
 
       if (currentPlayer === ai) {
-        setTimeout(aiMove, 500);  // حرکت کامپیوتر با کمی تأخیر
+        setTimeout(aiMove, 500);
       }
     }
 
-    // حرکت کامپیوتر
     function aiMove() {
       const bestMove = minimax(board, ai);
       board[bestMove.index] = ai;
       renderBoard();
-      if (checkWinner(ai)) {
+
+      const winnerPattern = checkWinner(ai);
+      if (winnerPattern) {
+        drawLine(winnerPattern);
         statusElement.textContent = 'کامپیوتر برنده شد!';
-        gameOver = true;  // بازی تمام شده است
+        gameOver = true;
         return;
       }
+
       currentPlayer = human;
       statusElement.textContent = 'نوبت شماست (X)';
     }
 
-    // الگوریتم Minimax برای انتخاب بهترین حرکت
     function minimax(board, player) {
       const availableMoves = getAvailableMoves(board);
-      if (checkWinner(human, board)) return { score: -10 };  // انسان برده
-      if (checkWinner(ai, board)) return { score: 10 };  // کامپیوتر برده
-      if (availableMoves.length === 0) return { score: 0 };  // مساوی
+      if (checkWinner(human, board)) return { score: -10 };
+      if (checkWinner(ai, board)) return { score: 10 };
+      if (availableMoves.length === 0) return { score: 0 };
 
-      let moves = [];
-
-      for (let i = 0; i < availableMoves.length; i++) {
-        const move = availableMoves[i];
+      const moves = [];
+      for (const move of availableMoves) {
         const newBoard = [...board];
         newBoard[move] = player;
         const result = minimax(newBoard, player === ai ? human : ai);
         moves.push({ index: move, score: result.score });
       }
 
-      let bestMove;
       if (player === ai) {
-        let bestScore = -Infinity;
-        moves.forEach(move => {
-          if (move.score > bestScore) {
-            bestScore = move.score;
-            bestMove = move;
-          }
-        });
+        return moves.reduce((best, move) => (move.score > best.score ? move : best), { score: -Infinity });
       } else {
-        let bestScore = Infinity;
-        moves.forEach(move => {
-          if (move.score < bestScore) {
-            bestScore = move.score;
-            bestMove = move;
-          }
-        });
+        return moves.reduce((best, move) => (move.score < best.score ? move : best), { score: Infinity });
       }
-
-      return bestMove;
     }
 
-    // دریافت حرکات قابل انجام
     function getAvailableMoves(board) {
       return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
     }
 
-    // بررسی برنده
-    function checkWinner(player, board = null) {
-      board = board || this.board; // اگر برد مشخص نشده باشد، از برد اصلی استفاده می‌کنیم
-      const winPatterns = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], // سطرها
-        [0, 3, 6], [1, 4, 7], [2, 5, 8], // ستون‌ها
-        [0, 4, 8], [2, 4, 6] // قطری‌ها
-      ];
-
-      return winPatterns.some(pattern => pattern.every(index => board[index] === player));
+    function checkWinner(player) {
+      return winPatterns.find(pattern => pattern.every(index => board[index] === player));
     }
 
-    // شروع بازی
+    function drawLine(pattern) {
+      const positions = [
+        { x: 50, y: 50 }, { x: 50, y: 150 }, { x: 50, y: 250 }, // ستون‌ها
+        { x: 150, y: 50 }, { x: 150, y: 150 }, { x: 150, y: 250 }, // سطرها
+        { x: 150, y: 150 }, { x: 150, y: 150 }, // قطرها
+      ];
+      const first = pattern[0], last = pattern[2];
+      const firstPos = positions[first];
+      const lastPos = positions[last];
+      lineElement.style.top = `${(firstPos.y + lastPos.y) / 2}px`;
+      lineElement.style.left = `${(firstPos.x + lastPos.x) / 2}px`;
+      lineElement.style.display = 'block';
+      lineElement.style.transform = `rotate(${getAngle(firstPos, lastPos)}deg)`;
+    }
+
+    function getAngle(a, b) {
+      return Math.atan2(b.y - a.y, b.x - a.x) * (180 / Math.PI);
+    }
+
     renderBoard();
   </script>
 </body>
