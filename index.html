@@ -50,7 +50,8 @@
     const board = Array(9).fill(null);
     const human = "X";
     const ai = "O";
-    let currentPlayer = human;  // نوبت اولیه انسان است
+    let currentPlayer = human;
+    let gameOver = false; // متغیر برای پایان بازی
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
@@ -72,17 +73,20 @@
 
     // حرکت انسان یا کامپیوتر
     function handleMove(index) {
-      if (board[index]) return;  // اگر خانه پر است، حرکت انجام نمی‌شود
+      if (board[index] || gameOver) return; // بازی تمام شده یا خانه پر است
+
       board[index] = currentPlayer;
       renderBoard();
-      
+
       if (checkWinner(currentPlayer)) {
         statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
+        gameOver = true; // بازی تمام شده است
         return;
       }
 
       if (board.every(cell => cell)) {
         statusElement.textContent = 'بازی مساوی شد!';
+        gameOver = true; // بازی تمام شده است
         return;
       }
 
@@ -91,7 +95,7 @@
       statusElement.textContent = `نوبت ${currentPlayer === human ? 'شما' : 'کامپیوتر'} (${currentPlayer})`;
 
       if (currentPlayer === ai) {
-        setTimeout(aiMove, 500);  // حرکت کامپیوتر با کمی تأخیر
+        setTimeout(aiMove, 500); // حرکت کامپیوتر با کمی تأخیر
       }
     }
 
@@ -102,6 +106,7 @@
       renderBoard();
       if (checkWinner(ai)) {
         statusElement.textContent = 'کامپیوتر برنده شد!';
+        gameOver = true; // بازی تمام شده است
         return;
       }
       currentPlayer = human;
@@ -113,7 +118,7 @@
       const availableMoves = getAvailableMoves(board);
       let bestMove = null;
 
-      // اول، کامپیوتر (O) تلاش می‌کند تا از برد کاربر جلوگیری کند
+      // جلوگیری از برد انسان
       for (let i = 0; i < availableMoves.length; i++) {
         const move = availableMoves[i];
         const newBoard = [...board];
@@ -124,7 +129,7 @@
         }
       }
 
-      // اگر هنوز بهترین حرکت پیدا نشده بود، کامپیوتر به دنبال برد خود می‌گردد
+      // تلاش برای برد کامپیوتر
       if (!bestMove) {
         for (let i = 0; i < availableMoves.length; i++) {
           const move = availableMoves[i];
@@ -137,7 +142,7 @@
         }
       }
 
-      // اگر هنوز بهترین حرکت پیدا نشده بود، کامپیوتر یکی از خانه‌های خالی را انتخاب می‌کند
+      // انتخاب خانه خالی
       if (!bestMove) {
         bestMove = { index: availableMoves[0], score: 0 };
       }
