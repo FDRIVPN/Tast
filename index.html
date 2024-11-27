@@ -50,6 +50,7 @@
     const board = Array(9).fill(null);
     const human = "X";
     const ai = "O";
+    let currentPlayer = human;  // نوبت اولیه انسان است
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
@@ -64,26 +65,34 @@
           cellElement.textContent = cell;
           cellElement.classList.add('taken');
         }
-        cellElement.addEventListener('click', () => handleHumanMove(index), { once: true });
+        cellElement.addEventListener('click', () => handleMove(index), { once: true });
         boardElement.appendChild(cellElement);
       });
     }
 
-    // حرکت انسان
-    function handleHumanMove(index) {
+    // حرکت انسان یا کامپیوتر
+    function handleMove(index) {
       if (board[index]) return;  // اگر خانه پر است، حرکت انجام نمی‌شود
-      board[index] = human;
+      board[index] = currentPlayer;
       renderBoard();
-      if (checkWinner(human)) {
-        statusElement.textContent = 'شما برنده شدید!';
+      
+      if (checkWinner(currentPlayer)) {
+        statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
         return;
       }
+
       if (board.every(cell => cell)) {
         statusElement.textContent = 'بازی مساوی شد!';
         return;
       }
-      statusElement.textContent = 'نوبت کامپیوتر (O)';
-      setTimeout(aiMove, 500);
+
+      // تغییر نوبت بازی
+      currentPlayer = currentPlayer === human ? ai : human;
+      statusElement.textContent = `نوبت ${currentPlayer === human ? 'شما' : 'کامپیوتر'} (${currentPlayer})`;
+
+      if (currentPlayer === ai) {
+        setTimeout(aiMove, 500);  // حرکت کامپیوتر با کمی تأخیر
+      }
     }
 
     // حرکت کامپیوتر
@@ -95,6 +104,7 @@
         statusElement.textContent = 'کامپیوتر برنده شد!';
         return;
       }
+      currentPlayer = human;
       statusElement.textContent = 'نوبت شماست (X)';
     }
 
