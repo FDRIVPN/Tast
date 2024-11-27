@@ -51,6 +51,7 @@
     const human = "X";
     const ai = "O";
     let currentPlayer = human;  // نوبت اولیه انسان است
+    let gameOver = false;  // وضعیت بازی (آیا تمام شده است یا نه)
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
@@ -72,17 +73,19 @@
 
     // حرکت انسان یا کامپیوتر
     function handleMove(index) {
-      if (board[index]) return;  // اگر خانه پر است، حرکت انجام نمی‌شود
+      if (board[index] || gameOver) return;  // اگر خانه پر است یا بازی تمام شده است، حرکت انجام نمی‌شود
       board[index] = currentPlayer;
       renderBoard();
       
       if (checkWinner(currentPlayer)) {
         statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
+        gameOver = true;  // بازی تمام شده است
         return;
       }
 
       if (board.every(cell => cell)) {
         statusElement.textContent = 'بازی مساوی شد!';
+        gameOver = true;  // بازی تمام شده است
         return;
       }
 
@@ -102,6 +105,7 @@
       renderBoard();
       if (checkWinner(ai)) {
         statusElement.textContent = 'کامپیوتر برنده شد!';
+        gameOver = true;  // بازی تمام شده است
         return;
       }
       currentPlayer = human;
