@@ -21,6 +21,7 @@
       display: grid;
       grid-template-columns: repeat(3, 100px);
       grid-gap: 5px;
+      position: relative;
     }
     .cell {
       width: 100px;
@@ -37,27 +38,25 @@
     .cell.taken {
       cursor: not-allowed;
     }
-    .status {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 20px;
-    }
     .line {
       position: absolute;
       background-color: red;
       height: 5px;
-      width: 300px;
-      transform-origin: center;
-      transform: translate(-50%, -50%);
-      display: none; /* مخفی تا زمانی که برنده مشخص شود */
+      width: 0;
+      transform-origin: left;
+    }
+    .status {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 20px;
     }
   </style>
 </head>
 <body>
   <div class="game-container">
     <div class="board" id="board"></div>
-    <div class="line" id="line"></div> <!-- خط برنده -->
     <div class="status" id="status">نوبت شماست (X)</div>
+    <div class="line" id="line"></div>
   </div>
   <script>
     const board = Array(9).fill(null);
@@ -71,14 +70,14 @@
     const lineElement = document.getElementById("line");
 
     const winPatterns = [
-      [0, 1, 2], // ردیف اول
-      [3, 4, 5], // ردیف دوم
-      [6, 7, 8], // ردیف سوم
+      [0, 1, 2], // سطر اول
+      [3, 4, 5], // سطر دوم
+      [6, 7, 8], // سطر سوم
       [0, 3, 6], // ستون اول
       [1, 4, 7], // ستون دوم
       [2, 5, 8], // ستون سوم
-      [0, 4, 8], // قطر اصلی
-      [2, 4, 6], // قطر فرعی
+      [0, 4, 8], // قطر اول
+      [2, 4, 6], // قطر دوم
     ];
 
     function renderBoard() {
@@ -97,7 +96,6 @@
 
     function handleMove(index) {
       if (board[index] || gameOver) return;
-
       board[index] = currentPlayer;
       renderBoard();
 
@@ -111,7 +109,6 @@
 
       if (board.every(cell => cell)) {
         statusElement.textContent = 'بازی مساوی شد!';
-        gameOver = true;
         return;
       }
 
@@ -124,8 +121,20 @@
     }
 
     function aiMove() {
-      const bestMove = minimax(board, ai);
-      board[bestMove.index] = ai;
+      const winningMove = findWinningMove(ai);
+      const blockingMove = findWinningMove(human);
+
+      if (winningMove !== null) {
+        board[winningMove] = ai;
+      } else if (blockingMove !== null) {
+        board[blockingMove] = ai;
+      } else if (board[4] === null) {
+        board[4] = ai;
+      } else {
+        const bestMove = minimax(board, ai);
+        board[bestMove.index] = ai;
+      }
+
       renderBoard();
 
       const winnerPattern = checkWinner(ai);
@@ -166,26 +175,27 @@
     }
 
     function checkWinner(player) {
-      return winPatterns.find(pattern => pattern.every(index => board[index] === player));
+      return winPatterns.find(pattern => pattern.every(index => board[index] === player)) || null;
     }
 
     function drawLine(pattern) {
       const positions = [
-        { x: 50, y: 50 }, { x: 50, y: 150 }, { x: 50, y: 250 }, // ستون‌ها
-        { x: 150, y: 50 }, { x: 150, y: 150 }, { x: 150, y: 250 }, // سطرها
-        { x: 150, y: 150 }, { x: 150, y: 150 }, // قطرها
+        [10, 10], [110, 10], [210, 10],
+        [10, 110], [110, 110], [210, 110],
+        [10, 210], [110, 210], [210, 210],
       ];
-      const first = pattern[0], last = pattern[2];
-      const firstPos = positions[first];
-      const lastPos = positions[last];
-      lineElement.style.top = `${(firstPos.y + lastPos.y) / 2}px`;
-      lineElement.style.left = `${(firstPos.x + lastPos.x) / 2}px`;
-      lineElement.style.display = 'block';
-      lineElement.style.transform = `rotate(${getAngle(firstPos, lastPos)}deg)`;
-    }
 
-    function getAngle(a, b) {
-      return Math.atan2(b.y - a.y, b.x - a.x) * (180 / Math.PI);
+      const [start, middle, end] = pattern.map(index => positions[index]);
+      const x1 = start[0];
+      const y1 = start[1];
+      const x2 = end[0];
+      const y2 = end[1];
+
+      lineElement.style.left = `${x1}px`;
+      lineElement.style.top = `${y1}px`;
+      lineElement.style.width = `${Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)}px`;
+      lineElement.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
+      lineElement.style.visibility = 'visible';
     }
 
     renderBoard();
