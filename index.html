@@ -76,6 +76,9 @@
       if (board[index] || gameOver) return;  // اگر خانه پر است یا بازی تمام شده است، حرکت انجام نمی‌شود
       board[index] = currentPlayer;
       renderBoard();
+
+      // لاگ برای بررسی
+      console.log(`Player ${currentPlayer} moved to index ${index}`);
       
       if (checkWinner(currentPlayer)) {
         statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
@@ -158,12 +161,15 @@
 
     // بررسی برنده
     function checkWinner(player, board = null) {
-      board = board || this.board; // اگر برد مشخص نشده باشد، از برد اصلی استفاده می‌کنیم
+      board = board || this.board; // اص نشده باشد، از برد اصلی استفاده می‌کنیم
       const winPatterns = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8], // سطرها
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // ستون‌ها
         [0, 4, 8], [2, 4, 6] // قطری‌ها
       ];
+
+      console.log(`Checking for winner: ${player}`);
+
       return winPatterns.some(pattern => pattern.every(index => board[index] === player));
     }
 
